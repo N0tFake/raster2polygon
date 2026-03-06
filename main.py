@@ -20,13 +20,13 @@ warnings.filterwarnings("ignore")
 # Configuração
 # ---------------------------------------------------------------------------
 RASTER_PATH     = "./data/input/brazil_coverage_2024.tif"
-OUTPUT_DIR      = "./data/output"
+OUTPUT_DIR      = r"E:\Cobertura do Solo - Brasil"
 OUTPUT_FILE     = "brasil_coverage.gpkg"
 CHECKPOINT_FILE = "checkpoint_brasil_coverage.json"
 
 BLOCK_LENGTH   = 2048   # pixels por bloco (2 048 × 2 048 ~16 MB por banda uint8)
 BATCH_BLOCKS   = 25     
-NUM_CORES      = 4
+NUM_CORES      = 2
 MAX_IN_FLIGHT  = NUM_CORES * 3   # janela deslizante
 
 logging.basicConfig(
@@ -177,11 +177,11 @@ def main():
                     log.info(
                         "Escrita — %d/%d blocos  |  lote: %d geoms  |  "
                         "arquivo: %.1f MB",
-                        processed, total_blk, len(batch_geoms),
+                        processed, total_blk, len(batch_geom),
                         os.path.getsize(output_gpkg) / 1_048_576
                         if os.path.exists(output_gpkg) else 0,
                     )
-                    batch_geoms  = []
+                    batch_geom  = []
                     batch_count  = 0
                     first_write  = False
                 
@@ -196,10 +196,10 @@ def main():
                     pass
     
     # --- flush do último lote ---------------------------------------------------
-    if batch_geoms:
-        write_batch(batch_geoms, output_gpkg, crs, first_write)
+    if batch_geom:
+        write_batch(batch_geom, output_gpkg, crs, first_write)
         save_checkpoint(checkpoint_path, done_ids)
-        log.info("Último lote escrito: %d geoms.", len(batch_geoms))
+        log.info("Último lote escrito: %d geoms.", len(batch_geom))
 
     # --- remove checkpoint ao finalizar com sucesso -----------------------------
     if os.path.exists(checkpoint_path):
